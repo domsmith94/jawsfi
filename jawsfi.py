@@ -6,10 +6,12 @@ from signal import SIGINT, signal
 import argparse
 import os
 import sys
+import time
 
 # Console colors
 W = '\033[0m'  # white
 R = '\033[31m' # red
+G = '\033[32m' # green
 
 # Get arguments
 def parse_args():
@@ -61,8 +63,27 @@ def channel_hop(args):
 	if args.channel:
             time.sleep(.05)
 
+def enable_monitor(interface):
+    print '['+G+'+'+W+'] Starting monitor mode for '+G+interface+W
+    try:
+        os.system('ifconfig %s down' % interface)
+        os.system('iwconfig %s mode monitor' % interface)
+        os.system('ifconfig %s up' % interface)
+    except Exception:
+        sys.exit('['+R+'-'+W+'] Could not start monitor mode')
+
+def disable_monitor(interface):
+    print '['+R+'+'+W+'] Stopping monitor mode for '+R+interface+W
+    try:
+        os.system('ifconfig %s down' % interface)
+        os.system('iwconfig %s mode managed' % interface)
+        os.system('ifconfig %s up' % interface)
+    except Exception:
+        sys.exit('['+R+'-'+W+'] Could not disable monitor mode')
+
 # Shutdown jawsfi
 def stop(signal, frame):
+    disable_monitor(interface)
     sys.exit('Closing')
 
 # Run
@@ -73,6 +94,9 @@ if __name__ == "__main__":
     interface = args.interface
     DN = open(os.devnull, 'w')
     
+    # Start the interface
+    enable_monitor(interface)
+
     # Start channel hopping thread
     hop = Thread(target=channel_hop, args=(args,))
     hop.daemon = True
