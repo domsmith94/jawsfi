@@ -73,7 +73,7 @@ def enable_monitor(interface):
         sys.exit('['+R+'-'+W+'] Could not start monitor mode')
 
 def disable_monitor(interface):
-    print '['+R+'+'+W+'] Stopping monitor mode for '+R+interface+W
+    print '['+R+'-'+W+'] Stopping monitor mode for '+R+interface+W
     try:
         os.system('ifconfig %s down' % interface)
         os.system('iwconfig %s mode managed' % interface)
@@ -89,7 +89,7 @@ def stop(signal, frame):
 # Run
 if __name__ == "__main__":
     if os.geteuid():
-        sys.exit('['+R+'-'+W+'] Run using sudo.')
+        sys.exit('['+R+'!'+W+'] Run using sudo.')
     args = parse_args()
     interface = args.interface
     DN = open(os.devnull, 'w')
