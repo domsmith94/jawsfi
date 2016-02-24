@@ -9,6 +9,7 @@ import sys
 import time
 from datetime import datetime
 import pyshark
+import pprint
 
 # Console colors
 W = '\033[0m'  # white
@@ -51,7 +52,9 @@ def disable_monitor(interface):
 
 # Shutdown jawsfi
 def stop(signal, frame):
-	hop.stop()
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(stash)
+        hop.stop()
 	disable_monitor(interface)
 	sys.exit('Closing')
 
@@ -61,7 +64,7 @@ if __name__ == "__main__":
 		sys.exit('['+R+'!'+W+'] Run using sudo.')
 	args = parse_args()
 	interface = args.interface
-	
+
 	# Start the interface
 	enable_monitor(interface)
 
@@ -70,16 +73,16 @@ if __name__ == "__main__":
 	hop.start()
 
 	signal(SIGINT, stop)
-	
+
 	# Packet sniffing code
 	capture = pyshark.LiveCapture(interface=interface, display_filter='wlan.fc.type_subtype eq 4')
 	#capture.set_debug()
 
 	print 'Capturing all probe requests...'
 	stash = {}
-	
+
 	for packet in capture.sniff_continuously():
 		print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'
-		stash[packet.wlan.ta_resolved] = (packet.radiotap.dbm_antsignal, datetime.now())
+		stash[packet.wlan.ta_resolved] = (packet.radiotap.dbm_antsignal, datetime.now().isoformat())
 
 	stop(None, None)
