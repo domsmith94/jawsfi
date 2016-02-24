@@ -7,6 +7,7 @@ import argparse
 import os
 import sys
 import time
+import pyshark
 
 # Console colors
 W = '\033[0m'  # white
@@ -70,5 +71,10 @@ if __name__ == "__main__":
     signal(SIGINT, stop)
     
     # Packet sniffing code
-    while 1:
-        continue
+    capture = pyshark.LiveCapture(interface=interface, display_filter='wlan.fc.type_subtype eq 4')
+    #capture.set_debug()
+
+    print 'Capturing all probe requests...'
+    for packet in capture.sniff_continuously():
+	print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'
+    stop(None, None)
