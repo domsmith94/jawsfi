@@ -1,4 +1,4 @@
-# jawsfi
+# jawsfi-aws
 
 This directory is used for the server side application used in the jawsfi project. Designed and deployed on Amazon AWS Elastic Beanstalk
 
