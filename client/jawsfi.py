@@ -7,6 +7,7 @@ import argparse
 import os
 import sys
 import time
+from datetime import datetime
 import pyshark
 
 # Console colors
@@ -75,6 +76,10 @@ if __name__ == "__main__":
 	#capture.set_debug()
 
 	print 'Capturing all probe requests...'
+	stash = {}
+	
 	for packet in capture.sniff_continuously():
 		print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'
+		stash[packet.wlan.ta_resolved] = (packet.radiotap.dbm_antsignal, datetime.now())
+
 	stop(None, None)
