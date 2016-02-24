@@ -1,14 +1,19 @@
 from threading import Thread
-import threading
+from subprocess import Popen, PIPE
+from signal import SIGINT
 import time
+import threading
+import os
+import sys
 
 class HoppingThread(Thread):
     # This is the thread we will use for channel HoppingThread
 
-    def __init__(self):
+    def __init__(self, args):
         super(HoppingThread, self).__init__()
         self._stop = threading.Event()
-
+	self.args = args
+    	self.DN = open(os.devnull, 'w')
     def stop(self):
         self._stop.set()
 
@@ -23,16 +28,17 @@ class HoppingThread(Thread):
 
         while not self.stopped():
 
-            if args.channel:
+            if self.args.channel:
                 with lock:
-                   channelNum = args.channel
+                   channelNum = self.args.channel
             else:
                 channelNum +=1
                 if channelNum > maxChan:
                     channelNum = 1
 
                 try:
-                    proc = Popen(['iw', 'dev', args.interface, 'set', 'channel', str(channelNum)], stdout=DN, stderr=PIPE)
+                    if not self.stopped():
+		    	proc = Popen(['iw', 'dev', self.args.interface, 'set', 'channel', str(channelNum)], stdout=self.DN, stderr=PIPE)
                 except OSError:
                     print '['+R+'-'+W+'] Could not execute "iw"'
                     os.kill(os.getpid(),SIGINT)
@@ -43,5 +49,5 @@ class HoppingThread(Thread):
             
             if err:
                 print err
-        if args.channel:
+        if self.args.channel:
                 time.sleep(.05)
