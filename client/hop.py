@@ -49,5 +49,4 @@ class HoppingThread(Thread):
 
 			if err:
 				print err
-		if self.args.channel:
-				time.sleep(5)
+			time.sleep(5)

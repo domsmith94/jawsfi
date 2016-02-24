@@ -56,7 +56,7 @@ def stop(signal, frame):
         pp.pprint(stash)
         hop.stop()
 	disable_monitor(interface)
-	sys.exit('Closing')
+	sys.exit('['+R+'-'+W+'] Shutting down jawsfi...')
 
 # Run
 if __name__ == "__main__":
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 	capture = pyshark.LiveCapture(interface=interface, display_filter='wlan.fc.type_subtype eq 4')
 	#capture.set_debug()
 
-	print 'Capturing all probe requests...'
+	print '['+G+'+'+W+'] Capturing probe requests from '+G+interface+W
 	stash = {}
 
 	for packet in capture.sniff_continuously():
