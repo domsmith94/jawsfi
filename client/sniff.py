@@ -26,8 +26,6 @@ class SniffingThread(Thread):
 
     def get_reset(self):
         data = self.stash.copy()
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(data)
         self.stash = {}
         return data
 
@@ -40,6 +38,6 @@ class SniffingThread(Thread):
     	for packet in capture.sniff_continuously():
             if self.stopped():
                 break
-            self.stash[packet.wlan.ta_resolved] = packet.radiotap.dbm_antsignal
+            self.stash[packet.wlan.ta_resolved] = int(packet.radiotap.dbm_antsignal)
 
     	    #print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'

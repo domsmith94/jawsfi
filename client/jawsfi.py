@@ -83,6 +83,8 @@ if __name__ == "__main__":
 	while 1:
 		time.sleep(15)# every 10 minutes
 		data = sniff.get_reset()
+                pp = pprint.PrettyPrinter(indent=4)
+                pp.pprint(json.dumps(data))
 		r = requests.post(server_url + '/send-data', json = json.dumps(data))
 
 	stop(None, None)
