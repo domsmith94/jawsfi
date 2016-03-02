@@ -7,9 +7,11 @@ import argparse
 import os
 import sys
 import time
-from datetime import datetime
-import pyshark
 import pprint
+import requests
+
+# Server URL
+server_url = os.environ['JAWSFI_SERVER'] or 'localhost:5000'
 
 # Console colors
 W = '\033[0m'  # white
@@ -52,9 +54,10 @@ def disable_monitor(interface):
 
 # Shutdown jawsfi
 def stop(signal, frame):
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(stash)
-        hop.stop()
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(sniff.stash)
+    hop.stop()
+	sniff.stop()
 	disable_monitor(interface)
 	sys.exit('['+R+'-'+W+'] Shutting down jawsfi...')
 
@@ -72,17 +75,13 @@ if __name__ == "__main__":
 	hop = HoppingThread(args)
 	hop.start()
 
+	sniff = SniffingThread()
+	sniff.start()
+
 	signal(SIGINT, stop)
-
-	# Packet sniffing code
-	capture = pyshark.LiveCapture(interface=interface, display_filter='wlan.fc.type_subtype eq 4')
-	#capture.set_debug()
-
-	print '['+G+'+'+W+'] Capturing probe requests from '+G+interface+W
-	stash = {}
-
-	for packet in capture.sniff_continuously():
-		print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'
-		stash[packet.wlan.ta_resolved] = (packet.radiotap.dbm_antsignal, datetime.now().isoformat())
+	while 1:
+		time.sleep(600)# every 10 minutes
+		data = sniff.get_reset()
+		requests.post(server_url + '/send-data', data = data)
 
 	stop(None, None)
