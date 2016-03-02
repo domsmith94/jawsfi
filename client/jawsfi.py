@@ -8,6 +8,7 @@ import argparse
 import os
 import sys
 import time
+import json
 import pprint
 import requests
 
@@ -82,6 +83,6 @@ if __name__ == "__main__":
 	while 1:
 		time.sleep(15)# every 10 minutes
 		data = sniff.get_reset()
-		r = requests.post(server_url + '/send-data', json = data)
+		r = requests.post(server_url + '/send-data', json = json.dumps(data))
 
 	stop(None, None)

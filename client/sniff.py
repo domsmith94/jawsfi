@@ -2,7 +2,7 @@ from threading import Thread
 from datetime import datetime
 import pyshark
 import threading
-
+import pprint
 
 # Console colors
 W = '\033[0m'  # white
@@ -15,8 +15,8 @@ class SniffingThread(Thread):
     def __init__(self, interface):
         super(SniffingThread, self).__init__()
         self._stop = threading.Event()
-        self.stash = {}
         self.interface = interface
+        self.stash = {}
 
     def stop(self):
         self._stop.set()
@@ -26,6 +26,8 @@ class SniffingThread(Thread):
 
     def get_reset(self):
         data = self.stash.copy()
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(data)
         self.stash = {}
         return data
 
@@ -38,4 +40,6 @@ class SniffingThread(Thread):
     	for packet in capture.sniff_continuously():
             if self.stopped():
                 break
-    	    self.stash[packet.wlan.ta_resolved] = (packet.radiotap.dbm_antsignal, datetime.now().isoformat())
+            self.stash[packet.wlan.ta_resolved] = packet.radiotap.dbm_antsignal
+
+    	    #print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'
