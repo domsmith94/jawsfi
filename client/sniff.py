@@ -8,7 +8,7 @@ class SniffingThread(Thread):
     def __init__(self):
         super(SniffingThread, self).__init__()
         self._stop = threading.Event()
-		self.stash = {}
+		self.stash = []
 
     def stop(self):
         self._stop.set()
@@ -18,7 +18,7 @@ class SniffingThread(Thread):
 
     def get_reset(self):
         data = self.stash.copy()
-        self.stash = {}
+        self.stash = []
         return data
 
     def run(self):
@@ -32,4 +32,8 @@ class SniffingThread(Thread):
             if self.stopped():
                 break
     		print 'Device: ', packet.wlan.ta_resolved, ' Signal: ', packet.radiotap.dbm_antsignal ,'db'
-    		stash[packet.wlan.ta_resolved] = (packet.radiotap.dbm_antsignal, datetime.now().isoformat())
+            result = {}
+            result['mac'] = packet.wlan.ta_resolved
+            result['signal'] = packet.radiotap.dbm_antsignal
+            result['time'] = datetime.now().isoformat()
+            stash.append(result)
