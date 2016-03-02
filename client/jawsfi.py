@@ -3,6 +3,7 @@
 from threading import Thread, Lock
 from signal import SIGINT, signal
 from hop import HoppingThread
+from sniff import SniffingThread
 import argparse
 import os
 import sys
@@ -11,7 +12,7 @@ import pprint
 import requests
 
 # Server URL
-server_url = os.environ['JAWSFI_SERVER'] or 'localhost:5000'
+server_url = 'http://jawsfi-soton.appspot.com' #os.environ.get['JAWSFI_SERVER'] or 'localhost:5000'
 
 # Console colors
 W = '\033[0m'  # white
@@ -54,12 +55,10 @@ def disable_monitor(interface):
 
 # Shutdown jawsfi
 def stop(signal, frame):
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(sniff.stash)
     hop.stop()
-	sniff.stop()
-	disable_monitor(interface)
-	sys.exit('['+R+'-'+W+'] Shutting down jawsfi...')
+    sniff.stop()
+    disable_monitor(interface)
+    sys.exit('['+R+'-'+W+'] Shutting down jawsfi...')
 
 # Run
 if __name__ == "__main__":
@@ -75,13 +74,14 @@ if __name__ == "__main__":
 	hop = HoppingThread(args)
 	hop.start()
 
-	sniff = SniffingThread()
+	sniff = SniffingThread(interface)
 	sniff.start()
-
+        print '['+G+'+'+W+'] Using server: ' + server_url
+        print '['+G+'+'+W+'] Capturing probe requests from: '+G+interface+W
 	signal(SIGINT, stop)
 	while 1:
-		time.sleep(600)# every 10 minutes
+		time.sleep(15)# every 10 minutes
 		data = sniff.get_reset()
-		requests.post(server_url + '/send-data', data = data)
+		r = requests.post(server_url + '/send-data', json = data)
 
 	stop(None, None)
