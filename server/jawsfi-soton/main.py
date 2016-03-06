@@ -5,6 +5,7 @@ import models
 import jinja2
 import os
 import uuid
+import datetime
 from models import ResultSet
 from models import Result
 from models import Pi
@@ -31,11 +32,12 @@ class DataHandler(webapp2.RequestHandler):
 		jsonobject = json.loads(self.request.body)
 		auth = jsonobject['auth']
 		results = jsonobject['results']
-		#pythonobject = ast.literal_eval(jsonobject) #ast.literal used to ensure JSON is a Python dict
+		time = datetime.datetime.strptime(jsonobject['time'], "%Y-%m-%d %H:%M:%S")
 
 		if models.device_registered(auth):
 			if results:
 				result_set = ResultSet()
+				result_set.standard_time = roundTime(time,roundTo=5*60)
 				result_set_key = result_set.put()
 
 				for key, value in results.iteritems():
@@ -68,6 +70,17 @@ class RegisterHandler(webapp2.RequestHandler):
 		else:
 			self.response.write('Incorrect Device ID')
 
+def roundTime(dt=None, roundTo=60):
+   """Round a datetime object to any time laps in seconds
+   dt : datetime.datetime object, default now.
+   roundTo : Closest number of seconds to round to, default 1 minute.
+   Author: Thierry Husson 2012 - Use it as you want but don't blame me.
+   """
+   if dt == None : dt = datetime.datetime.now()
+   seconds = (dt - dt.min).seconds
+   # // is a floor division, not a comment on following line:
+   rounding = (seconds+roundTo/2) // roundTo * roundTo
+   return dt + datetime.timedelta(0,rounding-seconds,-dt.microsecond)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
