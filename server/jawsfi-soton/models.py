@@ -3,6 +3,8 @@ from google.appengine.ext import ndb
 class Pi(ndb.Model):
     """A model for storing Rasberry Pi devices"""
     pi_id = ndb.StringProperty(required=True)
+    name = ndb.StringProperty()
+    activated = ndb.BooleanProperty(default=False)
     created = ndb.DateTimeProperty(auto_now_add=True)
 
 class Result(ndb.Model):
@@ -33,3 +35,17 @@ def get_last_submission():
 	else:
 		return None
 
+def device_registered(token):
+	qry = Pi.query(Pi.pi_id==token)
+	results = qry.fetch(limit=1)
+	if results:
+		return results[0].activated
+	else:
+		return None
+
+def register_pi(token, name):
+	qry = Pi.query(Pi.pi_id==token)
+	results = qry.fetch(limit=1)
+	results[0].name = name
+	results[0].activated = True
+	results[0].put()
