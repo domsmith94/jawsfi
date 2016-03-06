@@ -1,5 +1,5 @@
 from threading import Thread
-from datetime import datetime
+from time import gmtime, strftime
 import pyshark
 import threading
 import pprint
@@ -25,7 +25,9 @@ class SniffingThread(Thread):
 	return self._stop.isSet()
 
     def get_reset(self):
-        data = self.stash.copy()
+        data = {}
+        data['time'] = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        data['results'] = self.stash.copy()
         self.stash = {}
         return data
 

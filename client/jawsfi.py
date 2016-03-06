@@ -13,7 +13,10 @@ import pprint
 import requests
 
 # Server URL
-server_url = 'http://jawsfi-soton.appspot.com' #os.environ.get['JAWSFI_SERVER'] or 'localhost:5000'
+server_url = 'https://jawsfi-soton.appspot.com' #os.environ.get['JAWSFI_SERVER'] or 'localhost:5000'
+
+# Set auth token
+result_data = {'auth': '3bd44669-0290-4f3a-991f-84187f5fc02a'}
 
 # Console colors
 W = '\033[0m'  # white
@@ -54,6 +57,18 @@ def disable_monitor(interface):
 	except Exception:
 		sys.exit('['+R+'-'+W+'] Could not disable monitor mode')
 
+def send_result(stash):
+	result_data.update(stash)
+	response = requests.post(server_url + '/send-data', json = json.dumps(result_data))
+	return response.status_code == requests.codes.ok
+
+def send_results():
+	# add the current stash to list of unsent stashes
+	stashes.append(sniff.get_reset())
+	# attempt to send all unsent stashes, if not recieved keep in unsent
+	# to attempt later
+	stashes[:] = [stash for stash in stashes if not send_result(stash)]
+
 # Shutdown jawsfi
 def stop(signal, frame):
     hop.stop()
@@ -67,7 +82,7 @@ if __name__ == "__main__":
 		sys.exit('['+R+'!'+W+'] Run using sudo.')
 	args = parse_args()
 	interface = args.interface
-
+	stashes = []
 	# Start the interface
 	enable_monitor(interface)
 
@@ -82,9 +97,6 @@ if __name__ == "__main__":
 	signal(SIGINT, stop)
 	while 1:
 		time.sleep(15)# every 10 minutes
-		data = sniff.get_reset()
-                pp = pprint.PrettyPrinter(indent=4)
-                pp.pprint(json.dumps(data))
-		r = requests.post(server_url + '/send-data', json = json.dumps(data))
+		send_results()
 
 	stop(None, None)

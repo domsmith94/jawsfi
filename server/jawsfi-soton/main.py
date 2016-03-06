@@ -39,7 +39,7 @@ class DataHandler(webapp2.RequestHandler):
 				db_result = Result(mac_address=key, signal=value, result_set=result_set_key)
 				db_result.put()
 
-			self.response.write('Should of put items in data store')
+			self.response.write('Should have put items in data store')
 
 class RegisterHandler(webapp2.RequestHandler):
 	# Used to check to see if a device is currently registered. URL parameter token used
