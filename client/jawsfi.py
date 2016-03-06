@@ -16,49 +16,15 @@ import requests
 server_url = 'https://jawsfi-soton.appspot.com' #os.environ.get['JAWSFI_SERVER'] or 'localhost:5000'
 
 # Set auth token
-result_data = {'auth': '3bd44669-0290-4f3a-991f-84187f5fc02a'}
+auth_token = '3bd44669-0290-4f3a-991f-84187f5fc02a'
+
+# Set result data template
+result_data = {'auth': auth_token}
 
 # Console colors
 W = '\033[0m'  # white
 R = '\033[31m' # red
 G = '\033[32m' # green
-
-# Get arguments
-def parse_args():
-	parser = argparse.ArgumentParser()
-
-	function = parser.add_mutually_exclusive_group(required=True)
-	register = function.add_argument_group()
-
-	register.add_argument("-r",
-						"--register",
-						help="Flag used for registering a device.")
-
-	register.add_argument("-t",
-						"--token",
-						help="Specify token.",
-						required=True)
-
-	register.add_argument("-n",
-						"--name",
-						help="Specify device name.",
-						required=True)
-
-	sniff = function.add_argument_group()
-	sniff.add_argument("-i",
-						"--interface",
-						help="Choose monitor mode interface. \
-								Example: -i mon5",
-				required=True)
-
-	sniff.add_argument("-c",
-						"--channel",
-						help="Listen for probe requests only on the specified channel. \
-								Example: -c 6")
-
-	return parser.parse_args()
-
-
 
 def enable_monitor(interface):
 	print '['+G+'+'+W+'] Starting monitor mode for '+G+interface+W
@@ -95,37 +61,94 @@ def send_results():
 
 # Shutdown jawsfi
 def stop(signal, frame):
-    hop.stop()
-    sniff.stop()
+    hop_thread.stop()
+    sniff_thread.stop()
     disable_monitor(interface)
     sys.exit('['+R+'-'+W+'] Shutting down jawsfi...')
 
+def register_request(name):
+    try:
+        response = requests.post(server_url + '/register', json = {'auth': auth_token, 'name': name})
+        return response.status_code == requests.codes.ok
+    except requests.exceptions.RequestException as e:
+        return False
+
 def register():
-	print 'registering'
+    print '['+G+'+'+W+'] Regeristing device...'
+
+    parser = argparse.ArgumentParser(
+            description='Register device with server')
+
+    parser.add_argument("-n",
+		    	"--name",
+    			help="Specify device name.",
+    			required=True)
+
+    args = parser.parse_args(sys.argv[2:])
+
+    if register_request(args.name):
+        print '['+G+'+'+W+'] Sucessfully registered device.'
+
+    print '['+R+'!'+W+'] Failed to register device.'
 
 def sniff():
-	if os.geteuid():
-		sys.exit('['+R+'!'+W+'] Run using sudo for sniffing traffic.')
-		interface = args.interface
-	stashes = []
-	# Start the interface
-	enable_monitor(interface)
+    global hop_thread, sniff_thread, interface
+    if os.geteuid():
+	sys.exit('['+R+'!'+W+'] Run using sudo for sniffing traffic.')
 
-	# Start channel hopping thread
-	hop = HoppingThread(args)
-	hop.start()
+    parser = argparse.ArgumentParser(
+            description='Sniff packets and send to server')
+    parser.add_argument("-i",
+    			"--interface",
+			help="Choose monitor mode interface. \
+			Example: -i mon5",
+			required=True)
 
-	sniff = SniffingThread(interface)
-	sniff.start()
-        print '['+G+'+'+W+'] Using server: ' + server_url
-        print '['+G+'+'+W+'] Capturing probe requests from: '+G+interface+W
-	signal(SIGINT, stop)
-	while 1:
-		time.sleep(15)# every 10 minutes
-		send_results()
+    parser.add_argument("-c",
+			"--channel",
+			help="Listen for probe requests only on the specified channel. \
+			Example: -c 6")
 
-	stop(None, None)
+    args = parser.parse_args(sys.argv[2:])
+
+    interface = args.interface
+
+    stashes = []
+    # Start the interface
+    enable_monitor(interface)
+
+    # Start channel hopping thread
+    hop_thread = HoppingThread(args)
+    hop_thread.start()
+
+    sniff_thread = SniffingThread(interface)
+    sniff_thread.start()
+    print '['+G+'+'+W+'] Capturing probe requests from: '+G+interface+W
+    signal(SIGINT, stop)
+    while 1:
+	time.sleep(15)# every 10 minutes
+	send_results()
+
+    stop(None, None)
+
+# Set commands
+commands = {'register': register, 'sniff': sniff}
+
 # Run
 if __name__ == "__main__":
-	args = parse_args()
-	print args
+    print '['+G+'+'+W+'] Using server: ' + server_url
+
+    parser = argparse.ArgumentParser(
+        usage='''jawsfi <command> [<args>]
+
+     register    Register a device with jawsfi server
+     sniff       Sniff and send traffic
+    ''')
+    parser.add_argument('command', help='Subcommand to run')
+    args = parser.parse_args(sys.argv[1:2])
+
+    if (not args.command) or (args.command not in commands):
+        print 'Unrecognised command'
+        parser.print_help()
+    else:
+        commands[args.command]()
