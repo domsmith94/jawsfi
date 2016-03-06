@@ -59,8 +59,11 @@ def disable_monitor(interface):
 
 def send_result(stash):
 	result_data.update(stash)
-	response = requests.post(server_url + '/send-data', json = json.dumps(result_data))
-	return response.status_code == requests.codes.ok
+        try:
+	    response = requests.post(server_url + '/send-data', json = result_data)
+	    return response.status_code == requests.codes.ok
+        except requests.exceptions.RequestException as e:
+            return False
 
 def send_results():
 	# add the current stash to list of unsent stashes
