@@ -27,17 +27,38 @@ G = '\033[32m' # green
 def parse_args():
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument("-i",
-				"--interface",
+	function = parser.add_mutually_exclusive_group(required=True)
+	register = function.add_argument_group()
+
+	register.add_argument("-r",
+						"--register",
+						help="Flag used for registering a device.")
+
+	register.add_argument("-t",
+						"--token",
+						help="Specify token.",
+						required=True)
+
+	register.add_argument("-n",
+						"--name",
+						help="Specify device name.",
+						required=True)
+
+	sniff = function.add_argument_group()
+	sniff.add_argument("-i",
+						"--interface",
 						help="Choose monitor mode interface. \
 								Example: -i mon5",
 				required=True)
 
-	parser.add_argument("-c",
+	sniff.add_argument("-c",
 						"--channel",
 						help="Listen for probe requests only on the specified channel. \
 								Example: -c 6")
+
 	return parser.parse_args()
+
+
 
 def enable_monitor(interface):
 	print '['+G+'+'+W+'] Starting monitor mode for '+G+interface+W
@@ -76,12 +97,13 @@ def stop(signal, frame):
     disable_monitor(interface)
     sys.exit('['+R+'-'+W+'] Shutting down jawsfi...')
 
-# Run
-if __name__ == "__main__":
+def register():
+	print 'registering'
+
+def sniff():
 	if os.geteuid():
-		sys.exit('['+R+'!'+W+'] Run using sudo.')
-	args = parse_args()
-	interface = args.interface
+		sys.exit('['+R+'!'+W+'] Run using sudo for sniffing traffic.')
+		interface = args.interface
 	stashes = []
 	# Start the interface
 	enable_monitor(interface)
@@ -100,3 +122,7 @@ if __name__ == "__main__":
 		send_results()
 
 	stop(None, None)
+# Run
+if __name__ == "__main__":
+	args = parse_args()
+	print args
