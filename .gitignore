@@ -1,3 +1,4 @@
 *.pyc
 /server/venv*
 *.war
+.idea/*
