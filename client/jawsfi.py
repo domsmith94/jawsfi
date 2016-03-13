@@ -13,10 +13,10 @@ import pprint
 import requests
 
 # Server URL
-server_url = 'https://jawsfi-soton.appspot.com' #os.environ.get['JAWSFI_SERVER'] or 'localhost:5000'
+server_url = os.getenv('JAWSFI_SERVER') #os.environ.get['JAWSFI_SERVER'] or 'localhost:5000'
 
 # Set auth token
-auth_token = '3bd44669-0290-4f3a-991f-84187f5fc02a'
+auth_token = os.getenv('JAWSFI_AUTH')
 
 # Set result data template
 result_data = {'auth': auth_token}
@@ -54,7 +54,7 @@ def send_result(stash):
 
 def send_results():
 	# add the current stash to list of unsent stashes
-	stashes.append(sniff.get_reset())
+	stashes.append(sniff_thread.get_reset())
 	# attempt to send all unsent stashes, if not recieved keep in unsent
 	# to attempt later
 	stashes[:] = [stash for stash in stashes if not send_result(stash)]
@@ -92,7 +92,7 @@ def register():
 		print '['+R+'!'+W+'] Failed to register device.'
 
 def sniff():
-	global hop_thread, sniff_thread, interface
+	global hop_thread, sniff_thread, interface, stashes
 	if os.geteuid():
 		sys.exit('['+R+'!'+W+'] Run using sudo for sniffing traffic.')
 
@@ -126,7 +126,7 @@ def sniff():
 	print '['+G+'+'+W+'] Capturing probe requests from: '+G+interface+W
 	signal(SIGINT, stop)
 	while 1:
-		time.sleep(15)# every 10 minutes
+		time.sleep(5*60)# every 10 minutes
 		send_results()
 
 	stop(None, None)
@@ -136,7 +136,14 @@ commands = {'register': register, 'sniff': sniff}
 
 # Run
 if __name__ == "__main__":
-	print '['+G+'+'+W+'] Using server: ' + server_url
+        if server_url:
+                print '['+G+'+'+W+'] Using server: ' + server_url
+        else:
+                sys.exit('['+R+'-'+W+'] JAWSFI_SERVER not configured...')
+
+        if not auth_token:
+                sys.exit('['+R+'-'+W+'] JAWSFI_AUTH not configured...')
+
 
 	parser = argparse.ArgumentParser(
 		usage='''jawsfi <command> [<args>]
