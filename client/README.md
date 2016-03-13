@@ -12,3 +12,13 @@ Dependencies
 
 - Python 2.7
 - pyshark library (https://github.com/KimiNewt/pyshark)
+
+## Registering a device
+```
+$ ./jawsfi.py register -n <name>
+```
+
+## Sniffing traffic
+```
+$ sudo ./jawsfi.py sniff -i <interface>
+```
