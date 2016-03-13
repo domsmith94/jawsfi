@@ -12,8 +12,9 @@ class HoppingThread(Thread):
 	def __init__(self, args):
 		super(HoppingThread, self).__init__()
 		self._stop = threading.Event()
-	        self.args = args
+		self.args = args
 		self.DN = open(os.devnull, 'w')
+
 	def stop(self):
 		self._stop.set()
 
@@ -21,7 +22,6 @@ class HoppingThread(Thread):
 		return self._stop.isSet()
 
 	def run(self):
-
 		channelNum = 0
 		maxChan = 11
 		err = None
@@ -30,7 +30,7 @@ class HoppingThread(Thread):
 
 			if self.args.channel:
 				with lock:
-			                channelNum = self.args.channel
+					channelNum = self.args.channel
 			else:
 				channelNum +=1
 				if channelNum > maxChan:
@@ -38,7 +38,7 @@ class HoppingThread(Thread):
 
 				try:
 					if not self.stopped():
-				                proc = Popen(['iw', 'dev', self.args.interface, 'set', 'channel', str(channelNum)], stdout=self.DN, stderr=PIPE)
+						proc = Popen(['iw', 'dev', self.args.interface, 'set', 'channel', str(channelNum)], stdout=self.DN, stderr=PIPE)
 				except OSError:
 					print '['+R+'-'+W+'] Could not execute "iw"'
 					os.kill(os.getpid(),SIGINT)
