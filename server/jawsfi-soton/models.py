@@ -22,6 +22,7 @@ class ResultSet(ndb.Model):
     # actually received and processed
     standard_time = ndb.DateTimeProperty()
     added = ndb.DateTimeProperty(auto_now_add=True)
+    auth = ndb.StringProperty()
 
 
 def get_num_unique_sets():
@@ -60,7 +61,7 @@ def register_pi(token, name):
     results[0].put()
 
 
-def process_results(results, time):
+def process_results(results, time, auth):
     def add_result(mac_address, signal, result_set_key):
         db_result = Result(mac_address=key, signal=value, result_set=result_set_key)
         db_result.put()
@@ -68,16 +69,19 @@ def process_results(results, time):
     def is_new_reading_stronger(signal_new, signal_old):
         return True if signal_new > signal_old else False
 
-    def get_result(mac):
-        qry = Result.query(Result.mac_address == mac)
+    def get_result(mac, set_key):
+        qry = Result.query(Result.mac_address == mac, Result.result_set == set_key)
         results = qry.fetch(limit=1)  # Only working with 1 at the moment
 
-        return results[0]
+        if results:
+            return results[0]
+        else :
+            return None
 
     def get_other_sets(time, key):
         # Query ndb to see if there are any other Results Sets for this time.
         qry = ResultSet.query(ResultSet.standard_time == time, ResultSet.key != key)
-        results = qry.fetch(limit=10)  # Only working with 10 at the moment
+        results = qry.fetch(limit=1)  # Only working with 1 at the moment
 
         return results
 
@@ -94,11 +98,12 @@ def process_results(results, time):
         return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
 
     # Round the time to the nearest 5 minute interval
-    time = roundTime(time, roundTo=5 * 60)
+    time = roundTime(time, roundTo=15 * 60)
 
     # Create a new ResultSet including the rounded time
     result_set = ResultSet()
     result_set.standard_time = time
+    result_set.auth = auth
     result_set_key = result_set.put()
 
     other_sets = get_other_sets(time, result_set_key)
@@ -106,7 +111,7 @@ def process_results(results, time):
     for key, value in results.iteritems():
         # If there are other sets, see if reading exists in it
         if other_sets:
-            result = get_result(key)
+            result = get_result(key, other_sets[0].key)
             # If the result being processed is in the other set, compare signal strength
             if result:
                 # If new value is stronger, remove old value and add new one to ndb
