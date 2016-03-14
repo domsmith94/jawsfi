@@ -126,7 +126,7 @@ def sniff():
 	print '['+G+'+'+W+'] Capturing probe requests from: '+G+interface+W
 	signal(SIGINT, stop)
 	while 1:
-		time.sleep(5*60)# every 10 minutes
+		time.sleep(15*60)# every 15 minutes
 		send_results()
 
 	stop(None, None)
