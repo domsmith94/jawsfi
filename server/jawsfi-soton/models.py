@@ -98,7 +98,7 @@ def process_results(results, time, auth):
         return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
 
     # Round the time to the nearest 5 minute interval
-    time = roundTime(time, roundTo=5 * 60)
+    time = roundTime(time, roundTo=15 * 60)
 
     # Create a new ResultSet including the rounded time
     result_set = ResultSet()

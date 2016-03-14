@@ -23,7 +23,6 @@ class MainHandler(webapp2.RequestHandler):
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
 
-
         self.response.write(template.render(template_values))
 
 
