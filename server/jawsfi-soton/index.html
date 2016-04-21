@@ -28,7 +28,7 @@
     <h1>Probe Results for Time</h1>
     <h3 id="probeResults">0</h3>
     <h4>Probe</h4>
-    <select name="probe">
+    <select name="authPicker" id="authPicker">
 	  {% for probe in probes %}
 	      <option value="{{ probe.auth }}">{{ probe.name }}</option>
 	  {% endfor %}
@@ -37,29 +37,29 @@
     <input type="text" id="datetimepicker" /><input id="getResults" type="button" value="Get"/><br><br>
 
 
-    <script src="satic/jquery-1.12.3.min.js"></script>
+    <script src="static/jquery-1.12.3.min.js"></script>
 	<script src="static/datetimepicker/jquery.datetimepicker.full.js"></script>
 	<script>
 		$('#datetimepicker').datetimepicker({
 			inline:true,
 			step: 15,
-			format: 'Y/m/d H:i',
+			format: 'Y-m-d H:i',
 			defaultSelect: false
 		});
 
 		$("#getResults").click(function(e){
 	        e.preventDefault();
-	        if($("#datetimepicker").val()){
-	        	$("#probeResults").html($("#datetimepicker").val() + ":00");
+	        if($("#datetimepicker").val() && $("#authPicker").val()){
 		        $.ajax({
 		        	type: "POST",
 		            url: "/avail",
-		            data: { 
+		            dataType: "json",
+		            data: JSON.stringify({ 
 		                auth: $("#authPicker").val(),
 		            	time: $("#datetimepicker").val() + ":00"
-		            },
+		            }),
 		            success: function(result){
-				    	$("#probeResults").html(result);
+				    	$("#probeResults").html(result.number);
 					}
 				});
 	        }
