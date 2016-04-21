@@ -33,8 +33,11 @@ def get_num_unique_sets():
 def get_num_results(auth, time):
     qry = ResultSet.query(ResultSet.standard_time == time, ResultSet.auth == auth)
     result_set = qry.fetch()
-    qry = Result.query(Result.result_set == result_set[0].key)
-    return qry.count()
+    if result_set:
+        qry = Result.query(Result.result_set == result_set[0].key)
+        return qry.count()
+    else:
+        return 'No Data'
 
 
 def get_unique_results():
