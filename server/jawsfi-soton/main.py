@@ -88,7 +88,7 @@ class GetAvailableResultsHandler(webapp2.RequestHandler):
         time = datetime.datetime.strptime(jsonobject['time'], "%Y-%m-%d %H:%M:%S")
 
         num = models.get_num_results(time)
-        output = {'standard_time': time, 'number': num}
+        output = {'standard_time': str(time), 'number': num}
         self.response.out.write(json.dumps(output))
 
 
