@@ -69,6 +69,18 @@ class RegisterHandler(webapp2.RequestHandler):
             self.response.set_status(401)
             self.response.write('Incorrect Device ID')
 
+class GetRegisteredProbesHandler(webapp2.RequestHandler):
+    def get(self):
+        probes = models.get_probes()
+        list = []
+
+        for probe in probes:
+            list.append({'id': probe.pi_id, 'name': probe.name})
+
+        output = {'probes': list}
+        self.response.out.write(json.dumps(output))
+
+
 
 class GetAvailableResultsHandler(webapp2.RequestHandler):
     def get(self):
@@ -98,4 +110,5 @@ app = webapp2.WSGIApplication([
     ('/send-data', DataHandler),
     ('/register', RegisterHandler),
     ('/avail', GetAvailableResultsHandler),
+    ('/probes', GetRegisteredProbesHandler),
 ], debug=True)

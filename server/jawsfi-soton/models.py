@@ -51,6 +51,10 @@ def get_sets_avail():
     qry = ResultSet.query()
     return qry.fetch()
 
+def get_probes():
+    qry = Pi.query()
+    return qry.fetch()
+
 
 def get_last_submission():
     qry = ResultSet.query().order(-ResultSet.added)
