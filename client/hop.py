@@ -23,7 +23,7 @@ class HoppingThread(Thread):
 
 	def run(self):
 		channelNum = 0
-		maxChan = 11
+		maxChan = 13
 		err = None
 
 		while not self.stopped():

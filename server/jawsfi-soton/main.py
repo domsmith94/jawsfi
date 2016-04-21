@@ -70,8 +70,32 @@ class RegisterHandler(webapp2.RequestHandler):
             self.response.write('Incorrect Device ID')
 
 
+class GetAvailableResultsHandler(webapp2.RequestHandler):
+    def get(self):
+        sets = models.get_sets_avail()
+
+        output = {}
+        times = []
+
+        for result in sets:
+            times.append(result.standard_time)
+
+        output['times'] = times
+        self.response.out.write(json.dumps(output))
+
+    def post(self):
+        jsonobject = json.loads(self.request.body)
+        time = datetime.datetime.strptime(jsonobject['time'], "%Y-%m-%d %H:%M:%S")
+
+        num = models.get_num_results(time)
+        output = {'standard_time': time, 'number': num}
+        self.response.out.write(json.dumps(output))
+
+
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/send-data', DataHandler),
     ('/register', RegisterHandler),
+    ('/avail', GetAvailableResultsHandler),
 ], debug=True)

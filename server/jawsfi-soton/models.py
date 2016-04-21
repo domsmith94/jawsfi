@@ -30,9 +30,26 @@ def get_num_unique_sets():
     return qry.count()
 
 
+def get_num_results(time):
+    qry = ResultSet.query(ResultSet.standard_time == time)
+    sets = qry.fetch()
+
+    num = 0
+    for result_Set in sets:
+        qry = Result.query(Result.result_set == result_Set.key)
+        num = num + qry.count()
+
+    return num
+
+
 def get_unique_results():
     qry = Result.query()
     return qry.count()
+
+
+def get_sets_avail():
+    qry = ResultSet.query()
+    return qry.fetch()
 
 
 def get_last_submission():
