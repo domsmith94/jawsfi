@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+	<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="datetimepicker/jquery.datetimepicker.css"/>
+	<style type="text/css">
+
+	.custom-date-style {
+		background-color: red !important;
+	}
+
+	.input{	
+	}
+	.input-wide{
+		width: 500px;
+	}
+
+	</style>
+	</head>
+  <body>
+    <h1>Results Summary</h1>
+
+    <h2>Unique ResultSets - {{ num_sets }}</h2>
+    <h2>Unique Results - {{ unique_results }}</h2>
+    <h2>Last Result Submitted - {{ last_result }}</h2>
+
+    <input type="text" id="datetimepicker3"/><input type="button" onclick="$('#datetimepicker3').datetimepicker({value:'2011/12/11 12:00'})" value="set inline value 2011/12/11 12:00"/><br><br>
+
+    <script src="https://code.jquery.com/jquery-1.12.3.min.js" integrity="sha256-aaODHAgvwQW1bFOGXMeX+pC4PZIPsvn2h1sArYOhgXQ=" crossorigin="anonymous"></script>
+	<script src="static/datetimepicker/jquery.datetimepicker.full.js"></script>
+	<script>
+		$('#datetimepicker3').datetimepicker({
+			inline:true
+		});
+	</script>
+  </body>
+</html>
+{% endautoescape %}

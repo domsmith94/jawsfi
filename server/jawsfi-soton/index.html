@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 {% autoescape true %}
 <html>
+	<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="static/datetimepicker/jquery.datetimepicker.css"/>
+	<style type="text/css">
+
+	.custom-date-style {
+		background-color: red !important;
+	}
+
+	.input{	
+	}
+	.input-wide{
+		width: 500px;
+	}
+
+	</style>
+	</head>
   <body>
     <h1>Results Summary</h1>
 
@@ -8,8 +25,47 @@
     <h2>Unique Results - {{ unique_results }}</h2>
     <h2>Last Result Submitted - {{ last_result }}</h2>
 
+    <h1>Probe Results for Time</h1>
+    <h3 id="probeResults">0</h3>
+    <h4>Probe</h4>
+    <select name="probe">
+	  {% for probe in probes %}
+	      <option value="{{ probe.auth }}">{{ probe.name }}</option>
+	  {% endfor %}
+	</select><br>
+	<h4>Time</h4>
+    <input type="text" id="datetimepicker" /><input id="getResults" type="button" value="Get"/><br><br>
 
 
-  </body>
+    <script src="https://code.jquery.com/jquery-1.12.3.min.js" integrity="sha256-aaODHAgvwQW1bFOGXMeX+pC4PZIPsvn2h1sArYOhgXQ=" crossorigin="anonymous"></script>
+	<script src="static/datetimepicker/jquery.datetimepicker.full.js"></script>
+	<script>
+		$('#datetimepicker').datetimepicker({
+			inline:true,
+			step: 15,
+			format: 'Y/m/d H:i',
+			defaultSelect: false
+		});
+
+		$("#getResults").click(function(e){
+	        e.preventDefault();
+	        if($("#datetimepicker").val()){
+	        	$("#probeResults").html($("#datetimepicker").val() + ":00");
+		        $.ajax({
+		        	type: "POST",
+		            url: "/avail",
+		            data: { 
+		                auth: $("#authPicker").val(),
+		            	time: $("#datetimepicker").val() + ":00"
+		            },
+		            success:function(result){
+				    	$("#probeResults").html(result);
+					}
+				});
+	        }
+	    });
+
+	</script>
+</body>
 </html>
 {% endautoescape %}
