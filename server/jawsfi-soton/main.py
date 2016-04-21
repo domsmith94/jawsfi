@@ -98,8 +98,9 @@ class GetAvailableResultsHandler(webapp2.RequestHandler):
     def post(self):
         jsonobject = json.loads(self.request.body)
         time = datetime.datetime.strptime(jsonobject['time'], "%Y-%m-%d %H:%M:%S")
+        auth = jsonobject['auth']
 
-        num = models.get_num_results(time)
+        num = models.get_num_results(auth, time)
         output = {'standard_time': str(time), 'number': num}
         self.response.out.write(json.dumps(output))
 

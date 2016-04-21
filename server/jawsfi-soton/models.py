@@ -30,16 +30,11 @@ def get_num_unique_sets():
     return qry.count()
 
 
-def get_num_results(time):
-    qry = ResultSet.query(ResultSet.standard_time == time)
-    sets = qry.fetch()
-
-    num = 0
-    for result_Set in sets:
-        qry = Result.query(Result.result_set == result_Set.key)
-        num = num + qry.count()
-
-    return num
+def get_num_results(auth, time):
+    qry = ResultSet.query(ResultSet.standard_time == time, ResultSet.auth == auth)
+    result_set = qry.fetch()
+    qry = Result.query(Result.result_set == result_set[0].key)
+    return qry.count()
 
 
 def get_unique_results():
