@@ -78,7 +78,7 @@ class GetAvailableResultsHandler(webapp2.RequestHandler):
         times = []
 
         for result in sets:
-            times.append(result.standard_time)
+            times.append(str(result.standard_time))
 
         output['times'] = times
         self.response.out.write(json.dumps(output))
