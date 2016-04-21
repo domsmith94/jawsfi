@@ -17,9 +17,18 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class MainHandler(webapp2.RequestHandler):
     # Used for home page
     def get(self):
+        probes = models.get_probes()
+        print probes
+        probe_list = []
+
+        for probe in probes:
+            probe_list.append({'auth': probe.pi_id, 'name': probe.name})
+
         template_values = {'num_sets': models.get_num_unique_sets(),
                            'unique_results': models.get_unique_results(),
-                           'last_result': models.get_last_submission()}
+                           'last_result': models.get_last_submission(),
+                           'probes': probe_list}
+
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
 
@@ -96,6 +105,9 @@ class GetAvailableResultsHandler(webapp2.RequestHandler):
         self.response.out.write(json.dumps(output))
 
     def post(self):
+        print 'something'
+        print self.request.body
+
         jsonobject = json.loads(self.request.body)
         time = datetime.datetime.strptime(jsonobject['time'], "%Y-%m-%d %H:%M:%S")
         auth = jsonobject['auth']
