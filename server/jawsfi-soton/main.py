@@ -44,6 +44,7 @@ class DataHandler(webapp2.RequestHandler):
         time = datetime.datetime.strptime(jsonobject['time'], "%Y-%m-%d %H:%M:%S")
 
         print('Recieved a request on send-data')
+        print self.request.body
 
         if models.device_registered(auth):
             if results:
